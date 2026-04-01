@@ -34,10 +34,9 @@
                     <label class="flex items-center cursor-pointer group">
                         <input
                             type="checkbox"
-                            wire:click="toggleTag({{ $tag->id }})"
-                            @if(in_array($tag->id, $selectedTags)) checked @endif
-                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600"
-                        >
+                            wire:model.live="selectedTags"
+                            value="{{ $tag->id }}"
+                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
                             {{ $tag->name }} ({{ $tag->bookmarks_count }})
                         </span>
@@ -45,9 +44,6 @@
                     @endforeach
                 </div>
             </div>
-
-
-
 
         </aside>
 

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Bookmark;
 use App\Models\Tag;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -58,41 +59,53 @@ class Dashboard extends Component
         $this->dispatch('close-dialog');
     }
 
-    public function getBookmarksProperty()
+    public function render()
     {
-        $query = Bookmark::with('tags')
-            ->where('user_id', auth()->id())
+        $userId = Auth::id();
+
+        if (!$userId) {
+            return view('livewire.dashboard', [
+                'bookmarks' => collect(),
+                'tags' => collect(),
+            ]);
+        }
+
+        $selectedTagIds = array_map('intval', $this->selectedTags);
+
+        $bookmarkQuery = Bookmark::with('tags')
+            ->where('user_id', $userId)
             ->where('is_archived', $this->showArchived);
 
         if ($this->search) {
-            $query->where('title', 'like', '%' . $this->search . '%');
+            $bookmarkQuery->where('title', 'like', '%' . $this->search . '%');
         }
 
-        if (!empty($this->selectedTags)) {
-            $query->whereHas('tags', function ($q) {
-                $q->whereIn('tags.id', $this->selectedTags);
-            });
+        if (!empty($selectedTagIds)) {
+            foreach ($selectedTagIds as $tagId) {
+                $bookmarkQuery->whereHas('tags', function ($q) use ($tagId) {
+                    $q->where('tags.id', $tagId);
+                });
+            }
         }
 
         switch ($this->sortBy) {
             case 'recently_visited':
-                $query->orderBy('last_visited_at', 'desc');
+                $bookmarkQuery->orderBy('last_visited_at', 'desc');
                 break;
             case 'most_visited':
-                $query->orderBy('view_count', 'desc');
+                $bookmarkQuery->orderBy('view_count', 'desc');
                 break;
-            default: // recently_added
-                $query->orderBy('created_at', 'desc');
+            default:
+                $bookmarkQuery->orderBy('created_at', 'desc');
         }
 
-        return $query->get();
-    }
-
-    public function render()
-    {
         return view('livewire.dashboard', [
-            'bookmarks' => $this->bookmarks,
-            'tags' => Tag::withCount('bookmarks')->get(),
+            'bookmarks' => $bookmarkQuery->get(),
+            'tags' => Tag::whereHas('bookmarks', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })->withCount(['bookmarks' => function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            }])->get(),
         ]);
     }
 }
