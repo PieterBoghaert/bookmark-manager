@@ -1,0 +1,17 @@
+@layer typography {
+    body {
+        @apply text-sm text-neutral-800;
+    }
+
+    h1 {
+        @apply text-2xl font-bold leading-[1.4];
+    }
+
+    h2 {
+        @apply text-xl leading-[1.2];
+    }
+
+    a {
+        @apply text-neutral-900;
+    }
+}

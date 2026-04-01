@@ -1,0 +1,15 @@
+.btn {
+    @apply bg-teal-700 hover:bg-teal-800 text-white text-base font-semibold py-2.5 px-3 cursor-pointer border border-transparent rounded-lg;
+}
+
+input:is([type="text"], [type="email"], [type="password"], textarea) {
+    @apply p-3 w-full border border-neutral-800 rounded-lg;
+}
+
+label {
+    @apply text-neutral-900 font-semibold;
+}
+
+.error {
+    @apply text-red-500 text-sm;
+}

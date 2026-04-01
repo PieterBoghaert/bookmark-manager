@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans:
+        Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol";
+
+    --color-teal-700: #014745;
+    --color-teal-800: #013c3b;
+    --color-neutral-800: #4c5c59;
+    --color-neutral-900: #051513;
+    --shadow-soft: 0 2px 4px 0 rgba(21, 21, 21, 0.06);
+}
+
+@import "./partials/_typo.css";
+@import "./partials/_form.css";
+
+/* Dialog Animations with @starting-style */
+.bookmark-dialog {
+    @apply max-h-[90vh] overflow-y-auto;
+    transition:
+        opacity 0.3s ease-out,
+        transform 0.3s ease-out,
+        overlay 0.3s ease-out allow-discrete,
+        display 0.3s ease-out allow-discrete;
+}
+
+.bookmark-dialog[open] {
+    @apply opacity-100;
+    transform: translateY(0) scale(1);
+}
+
+/* Starting style for when dialog appears */
+@starting-style {
+    .bookmark-dialog[open] {
+        @apply opacity-0;
+        transform: translateY(-20px) scale(0.95);
+    }
+}
+
+/* Backdrop animations */
+.bookmark-dialog::backdrop {
+    @apply bg-black/50 backdrop-blur-sm;
+    transition:
+        opacity 0.3s ease-out,
+        backdrop-filter 0.3s ease-out,
+        overlay 0.3s ease-out allow-discrete,
+        display 0.3s ease-out allow-discrete;
+}
+
+.bookmark-dialog[open]::backdrop {
+    @apply opacity-100;
+}
+
+@starting-style {
+    .bookmark-dialog[open]::backdrop {
+        @apply opacity-0;
+    }
+}
+
+/* Smooth scrollbar for dialog */
+.bookmark-dialog::-webkit-scrollbar {
+    @apply w-2;
+}
+
+.bookmark-dialog::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-700 rounded;
+}
+
+.bookmark-dialog::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded hover:bg-gray-400 dark:hover:bg-gray-500;
+}
