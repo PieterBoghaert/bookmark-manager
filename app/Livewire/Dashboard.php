@@ -31,10 +31,17 @@ class Dashboard extends Component
 
     public function toggleTag($tagId)
     {
-        if (in_array($tagId, $this->selectedTags)) {
-            $this->selectedTags = array_values(array_diff($this->selectedTags, [$tagId]));
+        $tagId = (int) $tagId;
+        $selected = array_map('intval', $this->selectedTags);
+
+        if (in_array($tagId, $selected, true)) {
+            $this->selectedTags = array_values(array_filter(
+                $selected,
+                fn(int $id) => $id !== $tagId
+            ));
         } else {
-            $this->selectedTags[] = $tagId;
+            $selected[] = $tagId;
+            $this->selectedTags = array_values(array_unique($selected));
         }
     }
 
@@ -43,6 +50,11 @@ class Dashboard extends Component
         $this->selectedTags = [];
         $this->search = '';
         $this->showArchived = false;
+    }
+
+    public function searchByTitle(): void
+    {
+        $this->search = trim($this->search);
     }
 
     public function openBookmarkForm($bookmarkId = null)
@@ -77,7 +89,7 @@ class Dashboard extends Component
             ->where('is_archived', $this->showArchived);
 
         if ($this->search) {
-            $bookmarkQuery->where('title', 'like', '%' . $this->search . '%');
+            $bookmarkQuery->where('title', 'like', trim($this->search) . '%');
         }
 
         if (!empty($selectedTagIds)) {

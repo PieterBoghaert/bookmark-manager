@@ -11,7 +11,7 @@
                 <label class="flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        wire:model.live="showArchived"
+                        wire:model="showArchived"
                         class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
                         Show Archived
@@ -34,9 +34,9 @@
                     <label class="flex items-center cursor-pointer group">
                         <input
                             type="checkbox"
-                            wire:model.live="selectedTags"
-                            value="{{ $tag->id }}"
-                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
+                            wire:change="toggleTag({{ $tag->id }})"
+                            @checked(in_array((int) $tag->id, array_map('intval', $selectedTags), true))
+                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
                             {{ $tag->name }} ({{ $tag->bookmarks_count }})
                         </span>
@@ -56,7 +56,8 @@
                     <div class="flex-1 max-w-2xl">
                         <input
                             type="text"
-                            wire:model.live.debounce.300ms="search"
+                            wire:model.debounce.1000ms="search"
+                            wire:keydown.enter.prevent="searchByTitle"
                             placeholder="Search bookmarks..."
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                     </div>
@@ -64,7 +65,7 @@
                     <div class="flex items-center space-x-4 ml-6">
                         <!-- Sort Dropdown -->
                         <select
-                            wire:model.live="sortBy"
+                            wire:model="sortBy"
                             class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white">
                             <option value="recently_added">Recently Added</option>
                             <option value="recently_visited">Recently Visited</option>
@@ -104,9 +105,9 @@
                     </p>
                 </div>
                 @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" wire:key="bookmarks-grid-{{ md5(json_encode([$selectedTags, $search, $sortBy, $showArchived])) }}">
                     @foreach($bookmarks as $bookmark)
-                    <livewire:components.bookmark-card :bookmark="$bookmark" :key="$bookmark->id" />
+                    <livewire:components.bookmark-card :bookmark="$bookmark" :key="'bookmark-' . $bookmark->id . '-' . md5(json_encode([$selectedTags, $search, $sortBy, $showArchived]))" />
                     @endforeach
                 </div>
                 @endif
