@@ -16,7 +16,6 @@ class Dashboard extends Component
 {
     public $search = '';
     public $selectedTags = [];
-    public $sortBy = 'recently_added';
     public $showArchived = false;
     public $showBookmarkForm = false;
     public $editingBookmark = null;
@@ -57,6 +56,7 @@ class Dashboard extends Component
         $this->search = trim($this->search);
     }
 
+    #[On('open-bookmark-form')]
     public function openBookmarkForm($bookmarkId = null)
     {
         $this->editingBookmark = $bookmarkId;
@@ -100,24 +100,20 @@ class Dashboard extends Component
             }
         }
 
-        switch ($this->sortBy) {
-            case 'recently_visited':
-                $bookmarkQuery->orderBy('last_visited_at', 'desc');
-                break;
-            case 'most_visited':
-                $bookmarkQuery->orderBy('view_count', 'desc');
-                break;
-            default:
-                $bookmarkQuery->orderBy('created_at', 'desc');
-        }
+
+
+        $tags = Tag::whereHas('bookmarks', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->withCount(['bookmarks' => function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        }])->get();
+
+        $selectedTagNames = $tags->whereIn('id', $selectedTagIds)->pluck('name');
 
         return view('livewire.dashboard', [
             'bookmarks' => $bookmarkQuery->get(),
-            'tags' => Tag::whereHas('bookmarks', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })->withCount(['bookmarks' => function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            }])->get(),
+            'tags' => $tags,
+            'selectedTagNames' => $selectedTagNames,
         ]);
     }
 }

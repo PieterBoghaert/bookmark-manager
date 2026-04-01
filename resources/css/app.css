@@ -76,3 +76,30 @@
 .bookmark-dialog::-webkit-scrollbar-thumb {
     @apply bg-gray-300 dark:bg-gray-600 rounded hover:bg-gray-400 dark:hover:bg-gray-500;
 }
+
+/* Bookmark card actions popover */
+.bookmark-actions-menu[popover] {
+    background: transparent;
+    position-anchor: auto;
+    position-area: bottom span-right;
+    position-try-fallbacks: flip-block, flip-inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    transform: translateY(-10%);
+    transition-property: opacity, overlay, transform;
+    transition-duration: 180ms;
+    transition-timing-function: ease;
+    transition-behavior: allow-discrete;
+}
+
+.bookmark-actions-menu:popover-open {
+    opacity: 1;
+    transform: translateY(0);
+
+    @starting-style {
+        opacity: 0;
+        transform: translateY(-10%);
+    }
+}

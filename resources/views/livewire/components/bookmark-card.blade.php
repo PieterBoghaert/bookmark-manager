@@ -9,14 +9,20 @@
             </p>
         </div>
 
-        <details class="relative">
-            <summary class="list-none cursor-pointer rounded-md p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
-                <span class="sr-only">Open bookmark actions</span>
+        <div>
+            <button
+                type="button"
+                popovertarget="bookmark-actions-{{ $bookmark->id }}"
+                class="bookmark-actions-trigger list-none cursor-pointer rounded-md p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
+                aria-label="Open bookmark actions">
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path d="M10 3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm0 5.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm0 5.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
                 </svg>
-            </summary>
-            <div class="absolute right-0 z-10 mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+            </button>
+            <div
+                id="bookmark-actions-{{ $bookmark->id }}"
+                popover
+                class="bookmark-actions-menu z-10 w-48 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
                 <a
                     href="{{ $bookmark->url }}"
                     target="_blank"
@@ -31,11 +37,31 @@
                     class="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
                     Copy URL
                 </button>
+                @if(!$bookmark->is_archived)
+                <button
+                    type="button"
+                    wire:click="togglePin"
+                    class="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+                    Unpin
+                </button>
+                <button
+                    type="button"
+                    wire:click="editBookmark({{ $bookmark->id }})"
+                    class="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+                    Edit
+                </button>
                 <button
                     type="button"
                     wire:click="toggleArchive"
                     class="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
-                    {{ $bookmark->is_archived ? 'Unarchive' : 'Archive' }}
+                    Archive
+                </button>
+                @else
+                <button
+                    type="button"
+                    wire:click="toggleArchive"
+                    class="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+                    Unarchive
                 </button>
                 <button
                     type="button"
@@ -44,8 +70,9 @@
                     class="block w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30">
                     Delete Permanently
                 </button>
+                @endif
             </div>
-        </details>
+        </div>
     </div>
 
     <div class="mt-4">
@@ -62,10 +89,19 @@
         @endforeach
     </div>
 
-    <div class="mt-4 border-t border-gray-200 pt-3 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400 flex flex-wrap items-center gap-x-4 gap-y-1">
-        <span>Visit count: {{ $bookmark->view_count }}</span>
-        <span>Created: {{ $bookmark->created_at?->format('d M Y H:i') }}</span>
-        <span>Last visited: {{ $bookmark->last_visited_at?->format('d M Y H:i') ?? 'Never' }}</span>
+    <div class="mt-4 border-t border-gray-200 pt-3 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400 flex items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span>Visit count: {{ $bookmark->view_count }}</span>
+            <span>Created: {{ $bookmark->created_at?->format('d M Y H:i') }}</span>
+            <span>Last visited: {{ $bookmark->last_visited_at?->format('d M Y H:i') ?? 'Never' }}</span>
+        </div>
+        <div>
+            @if($bookmark->is_archived)
+            <span class="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 text-[11px] font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                Archived
+            </span>
+            @endif
+        </div>
     </div>
 </div>
 

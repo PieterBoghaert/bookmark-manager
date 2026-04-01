@@ -3,21 +3,22 @@
         <!-- Sidebar -->
         <aside class="w-64 min-h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-6">
             <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">📚 Bookmarks</h1>
+                <button wire:click="resetFilters" class="text-2xl font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">📚 Bookmarks</button>
             </div>
 
-            <!-- Archive Toggle -->
-            <div class="mb-6">
-                <label class="flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        wire:model="showArchived"
-                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
-                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                        Show Archived
-                    </span>
-                </label>
-            </div>
+            <!-- Navigation -->
+            <nav class="mb-6 space-y-1">
+                <button
+                    wire:click="resetFilters"
+                    class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ !$showArchived ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    🏠 Home
+                </button>
+                <button
+                    wire:click="$set('showArchived', true)"
+                    class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $showArchived ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    🗄️ Archived
+                </button>
+            </nav>
 
             <!-- Tags Filter -->
             <div class="mb-6">
@@ -36,7 +37,7 @@
                             type="checkbox"
                             wire:change="toggleTag({{ $tag->id }})"
                             @checked(in_array((int) $tag->id, array_map('intval', $selectedTags), true))
-                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
+                        class="rounded text-teal-700 accent-teal-700 focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600">
                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
                             {{ $tag->name }} ({{ $tag->bookmarks_count }})
                         </span>
@@ -56,21 +57,14 @@
                     <div class="flex-1 max-w-2xl">
                         <input
                             type="text"
-                            wire:model.debounce.1000ms="search"
+                            wire:model.live.debounce.1000ms="search"
                             wire:keydown.enter.prevent="searchByTitle"
                             placeholder="Search bookmarks..."
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                     </div>
 
                     <div class="flex items-center space-x-4 ml-6">
-                        <!-- Sort Dropdown -->
-                        <select
-                            wire:model="sortBy"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white">
-                            <option value="recently_added">Recently Added</option>
-                            <option value="recently_visited">Recently Visited</option>
-                            <option value="most_visited">Most Visited</option>
-                        </select>
+
 
                         <!-- Dark Mode Toggle -->
                         <button
@@ -96,6 +90,18 @@
                 </div>
             </header>
 
+
+            <h1 class="px-6 pt-6 pb-2 text-xl font-semibold text-gray-800 dark:text-white">
+                @if($search && count($selectedTags) > 0)
+                Results for: "{{ $search }}" &middot; Tagged: {{ $selectedTagNames->join(', ') }}
+                @elseif($search)
+                Results for: "{{ $search }}"
+                @elseif(count($selectedTags) > 0)
+                Bookmarks tagged: {{ $selectedTagNames->join(', ') }}
+                @else
+                All bookmarks
+                @endif
+            </h1>
             <!-- Bookmarks Grid -->
             <div class="p-6 bookmarks-container" style="view-transition-name: bookmarks-container;">
                 @if($bookmarks->isEmpty())
@@ -105,9 +111,9 @@
                     </p>
                 </div>
                 @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" wire:key="bookmarks-grid-{{ md5(json_encode([$selectedTags, $search, $sortBy, $showArchived])) }}">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" wire:key="bookmarks-grid-{{ md5(json_encode([$selectedTags, $search, $showArchived])) }}">
                     @foreach($bookmarks as $bookmark)
-                    <livewire:components.bookmark-card :bookmark="$bookmark" :key="'bookmark-' . $bookmark->id . '-' . md5(json_encode([$selectedTags, $search, $sortBy, $showArchived]))" />
+                    <livewire:components.bookmark-card :bookmark="$bookmark" :key="'bookmark-' . $bookmark->id . '-' . md5(json_encode([$selectedTags, $search, $showArchived]))" />
                     @endforeach
                 </div>
                 @endif

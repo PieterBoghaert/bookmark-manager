@@ -43,6 +43,11 @@ class BookmarkCard extends Component
         $this->dispatch('url-copied', url: $this->bookmark->url);
     }
 
+    public function editBookmark(int $bookmarkId): void
+    {
+        $this->dispatch('open-bookmark-form', bookmarkId: $bookmarkId);
+    }
+
     public function render()
     {
         return view('livewire.components.bookmark-card');

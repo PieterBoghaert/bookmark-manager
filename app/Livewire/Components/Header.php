@@ -7,12 +7,10 @@ use Livewire\Component;
 class Header extends Component
 {
     public $search;
-    public $sortBy;
 
-    public function mount($search, $sortBy)
+    public function mount($search)
     {
         $this->search = $search;
-        $this->sortBy = $sortBy;
     }
 
     public function render()
