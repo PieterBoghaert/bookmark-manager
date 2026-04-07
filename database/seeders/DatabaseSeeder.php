@@ -9,6 +9,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -62,12 +63,28 @@ class DatabaseSeeder extends Seeder
                 });
 
             foreach ($payload['bookmarks'] ?? [] as $bookmarkData) {
+                $favicon = $bookmarkData['favicon'] ?? null;
+
+                if (is_string($favicon) && $favicon !== '') {
+                    if (!Str::startsWith($favicon, ['http://', 'https://', '/'])) {
+                        // Convert JSON relative path like "./assets/images/icon.png" to "/assets/images/icon.png".
+                        $favicon = '/' . ltrim($favicon, './');
+                    }
+
+                    if (Str::startsWith($favicon, '/') && !File::exists(public_path(ltrim($favicon, '/')))) {
+                        $domain = parse_url($bookmarkData['url'] ?? '', PHP_URL_HOST);
+                        $favicon = $domain
+                            ? "https://www.google.com/s2/favicons?domain={$domain}&sz=64"
+                            : null;
+                    }
+                }
+
                 $bookmark = Bookmark::query()->create([
                     'user_id' => $user->id,
                     'title' => $bookmarkData['title'],
                     'description' => $bookmarkData['description'] ?? null,
                     'url' => $bookmarkData['url'],
-                    'favicon' => $bookmarkData['favicon'] ?? null,
+                    'favicon' => $favicon,
                     'view_count' => $bookmarkData['visitCount'] ?? 0,
                     'last_visited_at' => $bookmarkData['lastVisited'] ?? null,
                     'is_pinned' => $bookmarkData['pinned'] ?? false,
